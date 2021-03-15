@@ -8,23 +8,49 @@ options:
 published: true
 ---
 {{#markdown}}
-Un-minified libraries and third-party scripts should be leveraged in local development environments for easier debugging if available. The code should not be committed to source control directly, but instead referenced in the *Assemble* files so that they are included in compiled versions of JavaScript deliverables. The final products will be compressed and minified with the rest of the source for delivery. Use `bower` to reference as much as possible before storing any third party scripts directly in the project. Make sure to use `--save-dev` to add the library to your bower config.
+Un-minified libraries and third-party scripts should be leveraged in local development environments for easier debugging if available. Code should not be committed to source control directly, but instead imported as an ES6 module within a script (e.g. vendor.js) via `node_modules`, and an ES5-equivalent script -- a consolidated, transpiled copy that is generated using such tools as **Webpack** with **Babel** -- that is referenced in the *Assemble* files so that they are included in the compiled versions of JavaScript deliverables.
 
+The final products will be compressed and minified with the rest of the source(s) for delivery. Use NPM to reference as much as possible before storing any third-party scripts directly in the project: i.e. `npm install`. Scripts that are referenced using a CDN, such as DOM-manipulation libraries like jQuery, are also acceptable and encouraged.
+
+The following is an example of how third-party scripts can be written by a developer and utilized within a typical project or assignment:
+{{/markdown}}
+
+{{#code "javascript"}}
+/* app/ejs/lib/jquery.js */
+
+import jquery from 'jquery';
+
+window.jQuery = jquery;
+window.$ = jquery;
+{{/code}}
+
+{{#code "javascript"}}
+/* app/ejs/vendor.js */
+
+import './lib/jquery.js';
+{{/code}}
+
+{{#code "handlebars"}}
+<!-- app/assemble/includes/_js-vendor.hbs -->
+
+<!-- ES5, backwards compatible version -->
+<script src="js/vendor.js"></script>
+{{/code}}
+
+{{#code "handlebars"}}
+<!-- app/assemble/includes/_js-vendor.hbs -->
+
+<!-- CDN -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+{{/code}}
+
+{{#markdown}}
 Likewise, third-party code and libraries should never be modified and their original source and the license must be documented and be appropriate for a project. Any changes to third party code must be agreed upon and must be for specific reasons. If changes are mandated by bug fixes then the appropriate upstream project should have the changes submitted (assuming the code is part of an open source repository).
 
-If a vendor library needs to be customized for the specific project, or is not generally available to install via `bower`, it can be saved in the `/app/js/vendor` directory of the project. The `bower_components` directory is not (and should not be) versioned and thus any changes made in that environment will not be saved.
+If a vendor library needs to be customized for the specific project, or is not generally available to install via `npm`, it can be saved in the `app/ejs/lib` directory of the project. The `node_modules` directory is not (and should not be) versioned and thus any changes made in that environment will not be saved.
 {{/markdown}}
-{{#code "handlebars"}}
-<!-- build:js js/main.js -->
-<script src="bower_components/jquery/dist/jquery.js"></script>
-<script src="bower_components/foundation-sites/js/foundation.core.js"></script>
-<script src="bower_components/foundation-sites/js/foundation.util.triggers.js"></script>
-<script src="bower_components/foundation-sites/js/foundation.util.mediaQuery.js"></script>
-<script src="bower_components/foundation-sites/js/foundation.sticky.js"></script>
-<script src="js/vendor/prism.js"></script>
-<script src="js/standards.js"></script>
-<!-- endbuild -->
-{{/code}}
+
+
 {{#markdown}}
 Library code should be treated as an external dependency and should be considered something that may need to be wholesale updated or replaced at a later time.
 
